@@ -1,4 +1,5 @@
 const Validator = require('fastest-validator');
+const { User } = require('../db/models');
 const qr = require('qr-image');
 const valid = new Validator;
 module.exports = {
@@ -74,5 +75,96 @@ module.exports = {
         } catch(err) {
             next(err);
         }
-    }
+    },
+    
+    register: async (req, res, next) => {
+        try {
+            const {email, password } = req.body;
+
+            const existUser = await User.findOne({ where: { email: email } });
+            if (existUser) {
+                return res.status(409).json({
+                    status: false,
+                    message: 'email already used!'
+                });
+            }
+
+            const encryptedPassword = await bcrypt.hash(password, 10);
+
+            const user = await User.create({
+                email: email,
+                password: encryptedPassword
+            });
+            
+            console.log(user)
+
+            return res.status(201).json({
+                status: true,
+                message: 'success',
+                data: {
+                    email: user.email
+                }
+            });
+        } catch (err) {
+            // console.log(err);
+            next(err);
+        }
+    },
+
+    login: async (req, res, next) => {
+        try {
+            const { email, password } = req.body;
+
+            const user = await User.findOne({ where: { email: email } });
+            if (!user) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'email or password doesn\'t match!'
+                });
+            }
+
+            const correct = await bcrypt.compare(password, user.password);
+            if (!correct) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'email or password doesn\'t match!'
+                });
+            }
+
+            // generate token
+            payload = {
+                id: user.id,
+                email: user.email,
+                login_type: user.login_type,
+                role: user.role,
+            };
+
+            const token = jwt.sign(payload, JWT_SIGNATURE_KEY);
+
+            return res.status(200).json({
+                status: true,
+                message: 'success',
+                data: {
+                    token: token
+                }
+            });
+        } catch (err) {
+            // console.log(err)
+            next(err);
+        }
+    },
+
+    whoami: (req, res, next) => {
+        const user = req.user;
+
+        try {
+            return res.status(200).json({
+                status: false,
+                message: 'success',
+                data: user
+            });
+        } catch (err) {
+            next(err);
+        }
+    },
 }
