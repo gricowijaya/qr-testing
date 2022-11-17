@@ -19,6 +19,7 @@ app.get("/", function rootHandler(req, res, next) {
     }
 });
 
+app.post("/register", controller.register);
 app.get("/generate-qr", controller.generateQR);
 app.get("/validator", controller.validation);
 
