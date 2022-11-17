@@ -15,8 +15,12 @@ const data = qr.imageSync('http://google.com', { type: 'png' });
 
 app.use(express.json());
 // All controllers should live here
-app.get("/", function rootHandler(req, res) {
-  res.end("Hello world!");
+app.get("/", function rootHandler(req, res, next) {
+    try { 
+          res.end("Hello world!");
+    } catch(err) { 
+        next(err);
+    }
 });
 
 app.get("/generate-qr", controller.generateQR);
