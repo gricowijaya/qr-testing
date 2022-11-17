@@ -2,6 +2,11 @@ const Validator = require('fastest-validator');
 const { User } = require('../db/models');
 const qr = require('qr-image');
 const valid = new Validator;
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const {
+    JWT_SECRET_KEY
+} = process.env
 module.exports = {
     uploadImage: (file) => {
         return new Promise(async(resolve, reject) => {
@@ -139,7 +144,7 @@ module.exports = {
                 role: user.role,
             };
 
-            const token = jwt.sign(payload, JWT_SIGNATURE_KEY);
+            const token = jwt.sign(payload, JWT_SECRET_KEY);
 
             return res.status(200).json({
                 status: true,
