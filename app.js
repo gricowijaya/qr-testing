@@ -2,23 +2,24 @@
 require('dotenv').config();
 const express = require('express');
 const controller = require('./controllers')
-const qr = require('qr-image');
 const app = express(); 
 const {
     PORT,
     ENV
-} = process.env
+} = process.env;
 
-// create the data
-const data = qr.imageSync('http://google.com', { type: 'png' });
-
-
+// use the express.json()
 app.use(express.json());
 // All controllers should live here
-app.get("/", function rootHandler(req, res) {
-  res.end("Hello world!");
+app.get("/", function rootHandler(req, res, next) {
+    try { 
+          res.end("Hello world!");
+    } catch(err) { 
+        next(err);
+    }
 });
 
+app.post("/register", controller.register);
 app.get("/generate-qr", controller.generateQR);
 app.get("/validator", controller.validation);
 
