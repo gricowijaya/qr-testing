@@ -1,36 +1,17 @@
 const Validator = require('fastest-validator');
+const qr = require('qr-image');
 const valid = new Validator;
 module.exports = {
     generateQR: (req, res, next) => {
         try {
-            const request = {
-                f_name: 0, 
-                l_name: "anwar", 
-                email: "jokoanwar@gmail.com", 
-                phone_number: "083333", 
-                age: 3, 
-            }
-
-            const schema = { 
-                f_name: 'string|min:3|max:30', 
-                l_name: "string|min:3|max:30", 
-                email: "email", 
-                phone_number: "string|min:10|max:12", 
-                age: 'number', 
-            }
-
-            const validate = valid.validate(request, schema);
-
-            if(validate.length) {
-                return res.status(404).json({
-                    status: true,
-                    message: validate.message
-                });
-            }
+            // create the qr
+            const data = qr.imageSync('http://google.com', { type: 'png' });
+            const qrString = data.toString('base64'); 
 
             return res.status(200).json({
                 status: true,
-                message: "Email Validated"
+                message: "QR Generated",
+                data: qrString
             });
         } catch(err) {
             next(err);
